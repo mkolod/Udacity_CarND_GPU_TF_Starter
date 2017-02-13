@@ -1,4 +1,4 @@
-FROM nvidia/cuda:8.0-cudnn5-runtime-ubuntu16.04
+FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
 
 MAINTAINER Marek Kolodziej <mkolod@gmail.com> 
 
@@ -43,6 +43,7 @@ RUN conda clean -tp -y
 
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
+COPY activate.sh /
 
 # Term 1 workdir
 RUN mkdir /src
@@ -60,7 +61,7 @@ ENV TF_CUDA_COMPUTE_CAPABILITIES "3.2,3.5,5.0,5.2,6.0,6.1"
 ENV TF_NEED_GCP 0
 ENV TF_NEED_HDFS 0
 ENV TF_NEED_OPENCL 0
-RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
+#RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
 
 # Configure Bazel
 ENV BAZELRC /root/.bazelrc
@@ -76,13 +77,13 @@ RUN BAZEL_VERSION=0.4.2 && \
     rm -rf /bazel
 
 # Build TensorFlow (can take about 10 minutes)
-RUN cd / && git clone https://github.com/tensorflow/tensorflow.git && cd tensorflow && \
+RUN ["/bin/bash", "-c", "cd / && . activate carnd-term1 && git clone https://github.com/tensorflow/tensorflow.git && cd tensorflow && \
     git checkout r0.12 && tensorflow/tools/ci_build/builds/configured GPU && \
     bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
     pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
     rm -rf /tmp/pip && \
-    rm -rf /root/.cache
+    rm -rf /root/.cache"]
 
 # TensorBoard
 EXPOSE 6006
@@ -90,3 +91,10 @@ EXPOSE 6006
 EXPOSE 8888
 # Flask Server
 EXPOSE 4567
+
+## Two Birds, One Stone
+# 1. sources conda environment
+# 2. prevents the zombie container issue when started as pid 1
+COPY run.sh /
+RUN chmod +x /run.sh
+ENTRYPOINT ["/run.sh"]
