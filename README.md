@@ -5,6 +5,8 @@ This is a slight modification of the original [Starter Kit](https://github.com/u
 
 This build includes optimized GPU code for TensorFlow for Kepler, Maxwell and Pascal architectures. This is different from the existing TF GPU Docker container, which does not include Pascal binaries and results in a JIT lag at application start time. This change and some others should enable short app start times and better runtime performance, especially on Pascal GPUs.
 
+The container also comes with additional features, such as text editors (vim, nano) and the ability to re-build TensorFlow (Bazel).
+
 ## Building the container
 1. Install the [nvidia-docker plugin](https://github.com/NVIDIA/nvidia-docker).
 2. Test that nvidia-docker works: 
