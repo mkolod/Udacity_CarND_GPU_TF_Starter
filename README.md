@@ -11,3 +11,5 @@ This build includes optimized GPU code for TensorFlow for Kepler, Maxwell and Pa
    ```nvidia-docker run --rm nvidia/cuda nvidia-smi```
 3. Run the build:
    ```nvidia-docker build -t udacity_carnd_gpu_tf_starter .```
+4. Check that the image exists:
+   ```nvidia-docker images | grep udacity_carnd_gpu_tf_starter```
